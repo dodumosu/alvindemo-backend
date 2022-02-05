@@ -1,0 +1,7 @@
+-r prod.in
+black
+flake8-isort
+honcho
+mimesis-factory
+pytest-factoryboy
+pytest-flask
