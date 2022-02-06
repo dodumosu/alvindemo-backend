@@ -27,11 +27,14 @@ class TransactionSchema(SQLAlchemyAutoSchema):
     def get_category(self, obj: Transaction) -> Union[str, None]:
         return obj.category.name if obj.category else None
 
-    def load_category(self, value: str) -> Union[Category, None]:
-        if value:
+    def load_category(self, value: Union[str, int]) -> Union[Category, None]:
+        if value and isinstance(value, str):
             return Category.query.filter(
                 func.lower(Category.name) == value.lower()
             ).first()
+
+        if value and isinstance(value, int):
+            return Category.query.filter(Category.id == value).first()
 
 
 class TransactionRangeSchema(ma.Schema):
@@ -43,4 +46,13 @@ class TransactionAggregateSchema(TransactionRangeSchema):
     operation = ma.fields.String(
         required=True, validate=validate.OneOf(TRANSACTION_AGGREGATE_TYPES)
     )
-    category = ma.fields.String()
+    category = ma.fields.Method(deserialize="load_category")
+
+    def load_category(self, value: Union[str, int]) -> Union[Category, None]:
+        if value and isinstance(value, str):
+            return Category.query.filter(
+                func.lower(Category.name) == value.lower()
+            ).first()
+
+        if value and isinstance(value, int):
+            return Category.query.filter(Category.id == value).first()
