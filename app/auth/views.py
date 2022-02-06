@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from datetime import timedelta
 from http import HTTPStatus
 
 from flask import abort, jsonify
@@ -28,5 +29,7 @@ def login(credentials):
     if not user.verify_and_update_password(credentials.get("password")):
         abort(HTTPStatus.UNAUTHORIZED)
 
-    access_token = create_access_token(identity=user.email)
+    access_token = create_access_token(
+        identity=user.email, expires_delta=timedelta(hours=24)
+    )
     return jsonify(access_token=access_token)
