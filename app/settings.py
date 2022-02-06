@@ -72,3 +72,7 @@ SENTRY_DSN = config("SENTRY_DSN", default=None)
 API_TITLE = "Transactions API"
 API_VERSION = "v1"
 OPENAPI_VERSION = "3.0.2"
+
+JWT_SECRET_KEY = config("JWT_SECRET_KEY")
+
+CURRENCY = config("CURRENCY", default="USD")
