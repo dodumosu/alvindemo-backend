@@ -59,5 +59,9 @@ class User(BaseModel, UserMixin):
     def get_by_phone(cls, phone: str):
         return cls.query.filter(cls.phone == phone).first()
 
+    @classmethod
+    def get_by_email(cls, email: str):
+        return cls.query.filter(cls.email == email).first()
+
     def set_password(self, plaintext_password: str) -> None:
         self.password = hash_password(plaintext_password)

@@ -5,6 +5,7 @@ from http import HTTPStatus
 import sentry_sdk
 import structlog
 from flask import Flask, jsonify
+from flask_security.datastore import SQLAlchemyUserDatastore
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 
@@ -87,6 +88,22 @@ def initialize_extensions(app: Flask) -> None:
     extensions.jwt_manager.init_app(app)
     extensions.limiter.init_app(app)
     extensions.talisman.init_app(app, force_https=force_https)
+
+    # register API blueprints
+    from flask_smorest import Blueprint
+
+    from . import routes
+
+    for item_name in dir(routes):
+        item = getattr(routes, item_name)
+        if isinstance(item, Blueprint):
+            extensions.api.register_blueprint(item)
+
+    # set up authentication
+    from .models import Role, User
+
+    datastore = SQLAlchemyUserDatastore(extensions.db, User, Role)
+    extensions.security.init_app(app, datastore)
 
 
 def create_app(**override_settings) -> Flask:
