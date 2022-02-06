@@ -80,6 +80,7 @@ def configure_error_logging() -> None:
 def initialize_extensions(app: Flask) -> None:
     force_https = not app.config.get("DEBUG") and app.config.get("FORCE_HTTPS")
 
+    extensions.api.init_app(app)
     extensions.cors.init_app(app)
     extensions.csrf.init_app(app)
     extensions.db.init_app(app)

@@ -47,12 +47,17 @@ class User(BaseModel, UserMixin):
     fs_uniquifier = sa.Column(
         sa.String, default=make_identifier, nullable=False, unique=True
     )
+    phone = sa.Column(sa.String, nullable=False, unique=True)
 
     roles = sa.orm.relationship(
         "Role",
         secondary="roles_users",
         backref=sa.orm.backref("users", lazy="dynamic"),
     )
+
+    @classmethod
+    def get_by_phone(cls, phone: str):
+        return cls.query.filter(cls.phone == phone).first()
 
     def set_password(self, plaintext_password: str) -> None:
         self.password = hash_password(plaintext_password)

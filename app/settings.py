@@ -68,3 +68,7 @@ REDIS_URL = config("REDIS_URL", default=None) or redis_uri.url
 RATELIMIT_STORAGE_URI = REDIS_URL
 
 SENTRY_DSN = config("SENTRY_DSN", default=None)
+
+API_TITLE = "Transactions API"
+API_VERSION = "v1"
+OPENAPI_VERSION = "3.0.2"

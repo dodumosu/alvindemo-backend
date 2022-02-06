@@ -3,7 +3,6 @@ import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declared_attr
 
 from ..extensions import db
-from ..utils import make_identifier
 
 
 class BaseModel(db.Model):
@@ -13,15 +12,6 @@ class BaseModel(db.Model):
     def id(self):
         return sa.Column(
             sa.Integer, autoincrement=True, nullable=False, primary_key=True
-        )
-
-    @declared_attr
-    def uid(self):
-        return sa.Column(
-            sa.String,
-            nullable=False,
-            unique=True,
-            default=make_identifier,
         )
 
     @declared_attr
@@ -39,10 +29,6 @@ class BaseModel(db.Model):
             server_default=sa.text("timezone('utc', now())"),
             server_onupdate=sa.text("timezone('utc', now())"),
         )
-
-    @classmethod
-    def get_by_uid(cls, uid: str):
-        return cls.query.filter(cls.uid == uid).first()
 
     @classmethod
     def new(cls, **kwargs):
