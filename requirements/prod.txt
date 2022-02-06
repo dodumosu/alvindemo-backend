@@ -429,6 +429,10 @@ pyparsing==3.0.7 \
     --hash=sha256:18ee9022775d270c55187733956460083db60b37d0d0fb357445f3094eed3eea \
     --hash=sha256:a6c06a88f252e6c322f65faf8f418b16213b51bdfaece0524c1c1bc30c63c484
     # via packaging
+python-dateutil==2.8.2 \
+    --hash=sha256:0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86 \
+    --hash=sha256:961d03dc3453ebbc59dbdea9e4e11c5651520a876d0f4db161e8674aae935da9
+    # via -r requirements/prod.in
 python-json-logger==2.0.2 \
     --hash=sha256:202a4f29901a4b8002a6d1b958407eeb2dd1d83c18b18b816f5b64476dde9096 \
     --hash=sha256:99310d148f054e858cd5f4258794ed6777e7ad2c3fd7e1c1b527f1cba4d08420
@@ -450,6 +454,7 @@ six==1.16.0 \
     #   flask-talisman
     #   furl
     #   orderedmultidict
+    #   python-dateutil
     #   sqlalchemy-utils
 sqlalchemy==1.4.31 \
     --hash=sha256:05fa14f279d43df68964ad066f653193187909950aa0163320b728edfc400167 \
