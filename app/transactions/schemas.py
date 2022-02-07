@@ -7,9 +7,14 @@ from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
 from sqlalchemy import func
 
 from ..categories.models import Category
+from ..extensions import db
 from .models import Transaction
 
 TRANSACTION_AGGREGATE_TYPES = ["average", "total", "max", "min", "count"]
+
+
+class TransactionDetailSchema(ma.Schema):
+    id = ma.fields.Integer(required=True)
 
 
 class TransactionSchema(SQLAlchemyAutoSchema):
@@ -19,8 +24,8 @@ class TransactionSchema(SQLAlchemyAutoSchema):
         model = Transaction
         load_instance = True
         exclude = ("user",)
+        sqla_session = db.session
 
-    id = auto_field(dump_only=True)
     created = auto_field(dump_only=True)
     updated = auto_field(dump_only=True)
 
@@ -29,9 +34,12 @@ class TransactionSchema(SQLAlchemyAutoSchema):
 
     def load_category(self, value: Union[str, int]) -> Union[Category, None]:
         if value and isinstance(value, str):
-            return Category.query.filter(
-                func.lower(Category.name) == value.lower()
-            ).first()
+            if not value.isdigit():
+                return Category.query.filter(
+                    func.lower(Category.name) == value.lower()
+                ).first()
+            else:
+                return Category.query.filter(Category.id == int(value)).first()
 
         if value and isinstance(value, int):
             return Category.query.filter(Category.id == value).first()

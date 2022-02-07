@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 from http import HTTPStatus
 
-from flask import abort, jsonify
+from flask import abort, jsonify, request
 from flask.views import MethodView
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_smorest import Blueprint
 from sqlalchemy import func
 
 from .. import models, utils
-from ..extensions import csrf
+from ..extensions import csrf, db
 from . import schemas
 
 blueprint = Blueprint(
@@ -28,6 +28,7 @@ class TransactionListView(MethodView):
     @blueprint.paginate(utils.CursorPage)
     @jwt_required()
     def get(self, filter_args=None):
+        """Transaction list"""
         email = get_jwt_identity()
         user = models.User.get_by_email(email)
         if user is None:
@@ -56,9 +57,9 @@ class TransactionListView(MethodView):
 class TransactionAggregateView(MethodView):
     @blueprint.arguments(schemas.TransactionAggregateSchema, location="query")
     @blueprint.doc(**utils.doc_extras)
-    @blueprint.paginate(utils.CursorPage)
     @jwt_required()
     def get(self, filter_args):
+        """Transaction aggregates"""
         email = get_jwt_identity()
         user = models.User.get_by_email(email)
         if user is None:
@@ -85,7 +86,7 @@ class TransactionAggregateView(MethodView):
             )
 
         operation = filter_args.get("operation")
-        match operation:
+        match operation.lower():
             case "average":
                 function = func.avg
             case "total":
@@ -103,45 +104,100 @@ class TransactionAggregateView(MethodView):
         return jsonify(result=result)
 
 
-@blueprint.route("/<int:id>")
-class TransactionDetailView(MethodView):
-    @blueprint.response(200, schemas.TransactionSchema)
-    @blueprint.doc(**utils.doc_extras)
-    @jwt_required()
-    def get(self, id: int):
-        email = get_jwt_identity()
-        user = models.User.get_by_email(email)
-        if not user:
-            abort(HTTPStatus.UNAUTHORIZED)
+# @blueprint.route("/<int:id>")
+# class TransactionDetailView(MethodView):
+#     @blueprint.arguments(
+#         schemas.TransactionDetailSchema, as_kwargs=True, location="path"
+#     )
+#     @blueprint.response(200, schemas.TransactionSchema)
+#     @blueprint.doc(**utils.doc_extras)
+#     @jwt_required()
+#     def get(self, **kwargs):
+#         """Transaction details"""
+#         email = get_jwt_identity()
+#         id = kwargs.get("id")
+#         user = models.User.get_by_email(email)
+#         if not user:
+#             abort(HTTPStatus.UNAUTHORIZED)
 
-        transaction = models.Transaction.query.filter(
-            models.Transaction.user == user,
-            models.Transaction.id == id,
-        ).first()
+#         transaction = models.Transaction.query.filter(
+#             models.Transaction.user == user,
+#             models.Transaction.id == id,
+#         ).first()
 
-        if transaction is None:
-            abort(HTTPStatus.NOT_FOUND)
+#         if transaction is None:
+#             abort(HTTPStatus.NOT_FOUND)
 
+#         return transaction
+
+#     @blueprint.arguments(
+#         schemas.TransactionDetailSchema, as_kwargs=True, location="path"
+#     )
+#     @blueprint.arguments(
+#         schemas.TransactionSchema(only=("category",)), as_kwargs=True
+#     )
+#     @blueprint.response(200, schemas.TransactionSchema)
+#     @blueprint.doc(**utils.doc_extras)
+#     @jwt_required()
+#     def put(self, **kwargs):
+#         """Transaction update"""
+#         email = get_jwt_identity()
+#         user = models.User.get_by_email(email)
+#         if not user:
+#             abort(HTTPStatus.UNAUTHORIZED)
+
+#         transaction = models.Transaction.query.filter(
+#             models.Transaction.user == user,
+#             models.Transaction.id == transaction_data.id,
+#         ).first()
+
+#         if transaction is None:
+#             abort(HTTPStatus.NOT_FOUND)
+
+#         # only update the category
+#         transaction.category = transaction_data.category
+#         transaction.save()
+
+#         return models.Transaction.query.filter(
+#             models.Transaction.user == user
+#         ).first()
+
+
+@blueprint.route("/<int:id>", methods=["GET", "PUT"])
+@blueprint.response(200, schemas.TransactionSchema)
+@blueprint.doc(**utils.doc_extras)
+@jwt_required()
+def transaction_detail_or_update(id: int):
+    email = get_jwt_identity()
+    user = models.User.get_by_email(email)
+    if user is None:
+        abort(HTTPStatus.UNAUTHORIZED)
+
+    transaction = models.Transaction.query.filter(
+        models.Transaction.user == user,
+        models.Transaction.id == id,
+    ).first()
+
+    if transaction is None:
+        abort(HTTPStatus.NOT_FOUND)
+
+    if request.method == "GET":
         return transaction
 
-    @blueprint.response(200, schemas.TransactionSchema)
-    @blueprint.doc(**utils.doc_extras)
-    @jwt_required
-    def put(self, update_data, id):
-        email = get_jwt_identity()
-        user = models.User.get_by_email(email)
-        if not user:
-            abort(HTTPStatus.UNAUTHORIZED)
+    if request.method == "PUT":
+        request_data = request.get_json()
+        s = schemas.TransactionSchema(only=("category",))
+        try:
+            result = s.load(request_data)
+        except Exception as ex:
+            print(ex)
+            abort(HTTPStatus.BAD_REQUEST)
 
-        transaction = models.Transaction.query.filter(
-            models.Transaction.user == user,
-            models.Transaction.id == id,
-        ).first()
+        category = result.category
+        transaction.category = category
 
-        if transaction is None:
-            abort(HTTPStatus.NOT_FOUND)
-
-        transaction.category = update_data.get("category")
+        # necessary because the result is bound to the session
+        db.session.expunge(result)
         transaction.save()
 
         return transaction
