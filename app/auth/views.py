@@ -22,6 +22,7 @@ csrf.exempt(blueprint)
 @blueprint.route("/login", methods=["POST"])
 @blueprint.arguments(UserLoginSchema)
 def login(credentials):
+    """Login endpoint"""
     user = User.get_by_email(credentials.get("username"))
     if not user:
         abort(HTTPStatus.UNAUTHORIZED)

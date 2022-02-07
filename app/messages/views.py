@@ -27,6 +27,7 @@ class MessageView(MethodView):
     @blueprint.doc(**utils.doc_extras)
     @jwt_required()
     def post(self, new_data):
+        """Post transaction messages"""
         email = get_jwt_identity()
         user = models.User.get_by_email(email)
         if not user:

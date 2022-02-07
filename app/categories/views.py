@@ -14,6 +14,7 @@ blueprint = Blueprint(
 @blueprint.response(200, CategorySchema(many=True))
 @jwt_required()
 def category_list():
+    """Category list"""
     categories = Category.query.order_by(Category.created)
 
     return categories
