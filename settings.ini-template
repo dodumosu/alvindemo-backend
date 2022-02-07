@@ -1,1 +1,46 @@
 [settings]
+; run app in debug mode? boolean, defaults to false (0)
+DEBUG=0
+
+; secret key. required
+SECRET_KEY=secretkey
+
+; app default time zone. defaults to UTC. uses an Olson timezone specifier, eg Africa/Lagos
+TIME_ZONE=UTC
+
+; should the app force a HTTPS connection? defaults to true (1)
+; setting this to true will make the app unusable in development and behind a proxy
+; it doesn't seem to affect Heroku's proxy though
+FORCE_HTTPS=1
+
+; for the database settings, you can use a database URI or split components of it
+; for example, this is a PostgreSQL database URI
+; DATABASE_URL=postgresql://dbusername:dbpassword@dbhost:dbport/databasename
+; or you can specify them separately:
+; DATABASE_HOST=dbhost (defaults to postgres)
+; DATABASE_PORT=dbport (defaults to the PostgreSQL default of 5432)
+; DATABASE_USER=dbusername (defaults to postgres)
+; DATABASE_PASSWORD=dbpassword (defaults to postgres)
+; DATABASE_DB=databasename (defaults to postgres)
+; the URI takes precendence if specified
+DATABASE_URL=postgresql://postgres:postgres@postgres/postgres
+
+; for the Redis settings, you can use a Redis URI or split components of it
+; REDIS_URL=redis://redisuser:redispassword@redishost:redisport/redis_db
+; or you can specify them separately:
+; REDIS_HOST=redishost (defaults to redis)
+; REDIS_PORT=redisport (defaults to the Redis default of 6379)
+; REDIS_USER=redisuser (defaults to redis)
+; REDIS_PASSWORD=redispassword (defaults to redis)
+; REDIS_DB=redis_db (defaults to 0)
+; the URI takes precendence if specified
+REDIS_URL=redis://redis:redis@redis/0
+
+; required. used for the JWT token
+JWT_SECRET_KEY=someothersecret
+
+; defaults to USD. this value will be parsed out of inbound texts
+CURRENCY=USD
+
+; required. this value will be used for hashing the passwords
+PASSWORD_SALT=some_random_string
