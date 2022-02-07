@@ -72,9 +72,12 @@ SENTRY_DSN = config("SENTRY_DSN", default=None)
 API_TITLE = "Transactions API"
 API_VERSION = "v1"
 OPENAPI_VERSION = "3.0.2"
+OPENAPI_JSON_PATH = "api-spec.json"
+OPENAPI_URL_PREFIX = "/doc"
 
 JWT_SECRET_KEY = config("JWT_SECRET_KEY")
 
 SECURITY_PASSWORD_SALT = config("PASSWORD_SALT")
+SECURITY_EMAIL_VALIDATOR_ARGS = {"check_deliverability": False}
 
 CURRENCY = config("CURRENCY", default="USD")
